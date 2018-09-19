@@ -20,7 +20,7 @@ namespace Ankh.YouTrack
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
     // a package.
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    // A Visual Studio component can be registered under different regitry roots; for instance
+    // A Visual Studio component can be registered under different registry roots; for instance
     // when you debug your package you want to register it in the experimental hive. This
     // attribute specifies the registry root to use if no one is provided to regpkg.exe with
     // the /root switch.
@@ -60,8 +60,8 @@ namespace Ankh.YouTrack
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this));
             base.Initialize();
 
-            var ctrnr = this as IServiceContainer;
-            ctrnr.AddService(typeof(AnkhConnector), (container, type) =>
+            var serviceContainer = this as IServiceContainer;
+            serviceContainer.AddService(typeof(AnkhConnector), (container, type) =>
             {
                 if ((container == this) && (typeof(AnkhConnector) == type))
                 {
