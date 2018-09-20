@@ -24,9 +24,7 @@ namespace Ankh.YouTrack.IssueTracker
 		/// <returns></returns>
         public static IssueRepository Create(IssueRepositorySettings settings)
 		{
-		    if (settings != null)
-		        return new AnkhRepository(settings.RepositoryUri, settings.RepositoryId, settings.CustomProperties);
-		    return null;
+		    return settings != null ? new AnkhRepository(settings.RepositoryUri, settings.RepositoryId, settings.CustomProperties) : null;
 		}
 
         /// <summary>

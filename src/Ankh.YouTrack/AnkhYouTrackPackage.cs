@@ -63,7 +63,7 @@ namespace Ankh.YouTrack
             var serviceContainer = this as IServiceContainer;
             serviceContainer.AddService(typeof(AnkhConnector), (container, type) =>
             {
-                if ((container == this) && (typeof(AnkhConnector) == type))
+                if (container == this && typeof(AnkhConnector) == type)
                 {
                     return new AnkhConnector();
                 }

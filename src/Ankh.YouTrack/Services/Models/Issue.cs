@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Ankh.YouTrack.Services.Models
 {
-	[DebuggerDisplay("{Id}")]
+	[DebuggerDisplay("{" + nameof(Id) + "}")]
     public class Issue
     {
         public string Id { get; set; }

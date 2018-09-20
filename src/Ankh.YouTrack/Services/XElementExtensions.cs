@@ -3,13 +3,15 @@ using System.Xml.Linq;
 
 namespace Ankh.YouTrack.Services
 {
-	static class XElementExtensions
+    internal static class XElementExtensions
 	{
 		internal static string GetStringValue(this XElement element, string fieldName)
 		{
 			foreach (var subElement in element.Elements("field"))
 			{
-				if (string.Equals(subElement.Attribute("name").Value, fieldName, StringComparison.OrdinalIgnoreCase))
+			    var nameAttribute = subElement.Attribute("name");
+
+                if (string.Equals(nameAttribute.Value, fieldName, StringComparison.OrdinalIgnoreCase))
 				{
 					var valueElement = subElement.Element("value");
 					if(valueElement != null)

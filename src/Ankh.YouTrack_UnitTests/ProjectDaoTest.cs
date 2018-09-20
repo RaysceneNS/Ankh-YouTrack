@@ -4,27 +4,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Ankh.YouTrack_UnitTests
 {
-	/// <summary>
-	///This is a test class for ProjectDaoTest and is intended
-	///to contain all ProjectDaoTest Unit Tests
-	///</summary>
 	[TestClass]
 	public class ProjectDaoTest
 	{
         private YouTrackConnect _target;
 
-		/// <summary>
-		/// Initializes this instance.
-		/// </summary>
 		[TestInitialize]
 		public void Initialize()
 		{
             _target = new YouTrackConnect(Constants.RepositoryUri);
 		}
 
-		/// <summary>
-		///A test for GetProjects
-		///</summary>
 		[TestMethod]
 		public void GetProjectsTest()
 		{
@@ -33,9 +23,6 @@ namespace Ankh.YouTrack_UnitTests
 			Assert.AreNotEqual(actual.Count, 0);
 		}
 
-		/// <summary>
-		///A test for GetStates
-		///</summary>
 		[TestMethod]
 		public void GetStatesTest()
 		{
@@ -44,9 +31,6 @@ namespace Ankh.YouTrack_UnitTests
 			Assert.AreNotEqual(actual.Count, 0);
 		}
 
-		/// <summary>
-		///A test for GetPriorities
-		///</summary>
 		[TestMethod]
 		public void GetPrioritiesTest()
 		{
@@ -55,9 +39,6 @@ namespace Ankh.YouTrack_UnitTests
 			Assert.AreNotEqual(actual.Count, 0);
 		}
 
-		/// <summary>
-		///A test for GetStates
-		///</summary>
 		[TestMethod]
 		public void GetIssueTypesTest()
 		{
@@ -66,9 +47,6 @@ namespace Ankh.YouTrack_UnitTests
 			Assert.AreNotEqual(actual.Count, 0);
 		}
 
-		/// <summary>
-		///A test for GetAllIssuesByProjectId
-		///</summary>
 		[TestMethod]
 		public void GetIssuesTest()
 		{

@@ -25,35 +25,32 @@ namespace Ankh.YouTrack.Services
         
         public NetworkCredential GetUserCredential()
         {
-            var cred = CredentialDialog.RetrieveCredentialFromApplicationInstanceCache(_uri.ToString());
-            if (cred == null)
+            var credential = CredentialDialog.RetrieveCredentialFromApplicationInstanceCache(_uri.ToString());
+            if (credential != null)
+                return credential;
+
+            if (_credDlg == null)
             {
-                if (_credDlg == null)
+                _credDlg = new CredentialDialog
                 {
-                    _credDlg = new CredentialDialog
-                    {
-                        Target = _uri.ToString(),
-                        UseApplicationInstanceCredentialCache = true,
-                        ShowSaveCheckBox = true,
-                        ShowUIForSavedCredentials = true,
-                        WindowTitle = "Issue Tracker",
-                        MainInstruction = "Provide password for " + _uri
-                    };
-                }
-                if (_credDlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    cred = _credDlg.Credentials;
-                }
+                    Target = _uri.ToString(),
+                    UseApplicationInstanceCredentialCache = true,
+                    ShowSaveCheckBox = true,
+                    ShowUIForSavedCredentials = true,
+                    WindowTitle = "Issue Tracker",
+                    MainInstruction = "Provide password for " + _uri
+                };
             }
-            return cred;
+            if (_credDlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                credential = _credDlg.Credentials;
+            }
+            return credential;
         }
 
         public void ConfirmUserCredential(bool confirm)
         {
-            if (_credDlg != null)
-            {
-                _credDlg.ConfirmCredentials(confirm);
-            }
+            _credDlg?.ConfirmCredentials(confirm);
         }
         
 	    /// <summary>
@@ -98,7 +95,7 @@ namespace Ankh.YouTrack.Services
 			    if (response.StatusCode == HttpStatusCode.OK)
                     return true;
 			    
-                Trace.WriteLine(String.Format("POST failed. Received HTTP {0}", response.StatusCode));
+                Trace.WriteLine($"POST failed. Received HTTP {response.StatusCode}");
 			    return false;
 			}
 		}
@@ -110,17 +107,17 @@ namespace Ankh.YouTrack.Services
 		/// <returns></returns>
 		private static string CreateFormattedPostRequest(ICollection<KeyValuePair<string, string>> values)
 		{
-			var paramterBuilder = new StringBuilder();
+			var parameterBuilder = new StringBuilder();
 			var counter = 0;
 			foreach (var value in values)
 			{
-				paramterBuilder.AppendFormat("{0}={1}", value.Key, HttpUtility.UrlEncode(value.Value));
+				parameterBuilder.AppendFormat("{0}={1}", value.Key, HttpUtility.UrlEncode(value.Value));
 
 				if (counter != values.Count - 1)
-					paramterBuilder.Append("&");
+					parameterBuilder.Append("&");
 				counter++;
 			}
-			return paramterBuilder.ToString();
+			return parameterBuilder.ToString();
 		}
 
 		/// <summary>
@@ -270,7 +267,7 @@ namespace Ankh.YouTrack.Services
 		/// <returns></returns>
 		public IEnumerable<Issue> GetIssues(string projectId, string searchTerm, int maxRecords)
 		{
-			string queryString = string.IsNullOrEmpty(projectId) ? string.Format("rest/issue?max={0}", maxRecords) : string.Format("rest/issue/byproject/{0}?max={1}", projectId, maxRecords);
+			string queryString = string.IsNullOrEmpty(projectId) ? $"rest/issue?max={maxRecords}" : $"rest/issue/byproject/{projectId}?max={maxRecords}";
 
 			if (!string.IsNullOrEmpty(searchTerm))
 			{

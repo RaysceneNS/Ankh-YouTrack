@@ -100,14 +100,14 @@ namespace Ankh.YouTrack
 		public override void Register(RegistrationContext context)
 		{
 			context.Log.WriteLine("Issue Repository Connector:\t\t{0}\n", this._regName);
-            using (Key connectorsKey = context.CreateKey(RegKeyConnectors))
+            using (var connectorsKey = context.CreateKey(RegKeyConnectors))
 			{
-                using (Key connectorKey = connectorsKey.CreateSubkey(RegGuid.ToString("B").ToUpperInvariant()))
+                using (var connectorKey = connectorsKey.CreateSubkey(RegGuid.ToString("B").ToUpperInvariant()))
 				{
 					connectorKey.SetValue("", this.RegName);
                     connectorKey.SetValue(RegValueService, IssueRepositoryConnectorService.ToString("B").ToUpperInvariant());
 
-                    using (Key connectorNameKey = connectorKey.CreateSubkey(RegKeyName))
+                    using (var connectorNameKey = connectorKey.CreateSubkey(RegKeyName))
 					{
 						connectorNameKey.SetValue("", UIName);
                         connectorNameKey.SetValue(RegValuePackage, UINamePkg.ToString("B").ToUpperInvariant());

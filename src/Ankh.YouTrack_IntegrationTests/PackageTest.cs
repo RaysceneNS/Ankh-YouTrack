@@ -6,9 +6,6 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Ankh.YouTrack_IntegrationTests
 {
-	/// <summary>
-	/// Integration test for package validation
-	/// </summary>
 	[TestClass]
 	public class PackageTest
 	{
@@ -25,9 +22,8 @@ namespace Ankh.YouTrack_IntegrationTests
 				Assert.IsNotNull(shellService);
 
 				//Validate package load
-				IVsPackage package;
-				var packageGuid = new Guid(AppConstants.PACKAGE_GUID);
-				Assert.IsTrue(0 == shellService.LoadPackage(ref packageGuid, out package));
+			    var packageGuid = new Guid(AppConstants.PACKAGE_GUID);
+				Assert.IsTrue(0 == shellService.LoadPackage(ref packageGuid, out var package));
 				Assert.IsNotNull(package, "Package failed to load");
 			});
 		}

@@ -69,7 +69,7 @@ namespace Ankh.YouTrack.IssueTracker.Forms
 		    catch (Exception ex)
 		    {
 		        errorProvider.SetError(dgvList,
-		            String.Format("Error updating issues list check connection settings {0}.", ex.Message));
+		            $"Error updating issues list check connection settings {ex.Message}.");
 		        dgvList.Enabled = false;
                 youTrackConnect.ConfirmUserCredential(false);
 		    }

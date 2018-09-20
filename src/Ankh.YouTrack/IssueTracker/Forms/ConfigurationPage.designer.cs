@@ -54,7 +54,7 @@
             this.textRepositoryUri.Name = "textRepositoryUri";
             this.textRepositoryUri.Size = new System.Drawing.Size(261, 20);
             this.textRepositoryUri.TabIndex = 1;
-            this.textRepositoryUri.Validating += new System.ComponentModel.CancelEventHandler(this.textUrl_Validating);
+            this.textRepositoryUri.Validating += new System.ComponentModel.CancelEventHandler(this.TextUrl_Validating);
             // 
             // btnLoadProjects
             // 
@@ -64,7 +64,7 @@
             this.btnLoadProjects.TabIndex = 6;
             this.btnLoadProjects.Text = "Load";
             this.btnLoadProjects.UseVisualStyleBackColor = true;
-            this.btnLoadProjects.Click += new System.EventHandler(this.buttonLoadProjects_Click);
+            this.btnLoadProjects.Click += new System.EventHandler(this.ButtonLoadProjects_Click);
             // 
             // errorProvider
             // 

@@ -2,7 +2,7 @@
 
 namespace Ankh.YouTrack.Services.Models
 {
-	[DebuggerDisplay("{Name}")]
+	[DebuggerDisplay("{" + nameof(Name) + "}")]
     public class Project
     {
         public string ShortName { get; set; }

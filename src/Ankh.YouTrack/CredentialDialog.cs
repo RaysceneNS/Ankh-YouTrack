@@ -276,8 +276,7 @@ namespace Ankh.YouTrack
         /// <param name="container">The <see cref="IContainer"/> to add the component to.</param>
         public CredentialDialog(IContainer container)
         {
-            if (container != null)
-                container.Add(this);
+            container?.Add(this);
 
             InitializeComponent();
         }
@@ -732,11 +731,11 @@ namespace Ankh.YouTrack
         public static void StoreCredential(string target, NetworkCredential credential)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
             if (target.Length == 0)
-                throw new ArgumentException("Empty credential target", "target");
+                throw new ArgumentException("Empty credential target", nameof(target));
             if (credential == null)
-                throw new ArgumentNullException("credential");
+                throw new ArgumentNullException(nameof(credential));
 
             NativeMethods.CREDENTIAL c = new NativeMethods.CREDENTIAL
             {
@@ -781,16 +780,15 @@ namespace Ankh.YouTrack
         public static NetworkCredential RetrieveCredential(string target)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
             if (target.Length == 0)
-                throw new ArgumentException("Empty credential target", "target");
+                throw new ArgumentException("Empty credential target", nameof(target));
 
             NetworkCredential cred = RetrieveCredentialFromApplicationInstanceCache(target);
             if (cred != null)
                 return cred;
 
-            IntPtr credential;
-            bool result = NativeMethods.CredRead(target, NativeMethods.CredTypes.CRED_TYPE_GENERIC, 0, out credential);
+            bool result = NativeMethods.CredRead(target, NativeMethods.CredTypes.CRED_TYPE_GENERIC, 0, out var credential);
             int error = Marshal.GetLastWin32Error();
             if (result)
             {
@@ -828,14 +826,13 @@ namespace Ankh.YouTrack
         public static NetworkCredential RetrieveCredentialFromApplicationInstanceCache(string target)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
             if (target.Length == 0)
-                throw new ArgumentException("Empty credential target", "target");
+                throw new ArgumentException("Empty credential target", nameof(target));
 
             lock (_applicationInstanceCredentialCache)
             {
-                NetworkCredential cred;
-                if (_applicationInstanceCredentialCache.TryGetValue(target, out cred))
+                if (_applicationInstanceCredentialCache.TryGetValue(target, out var cred))
                 {
                     return cred;
                 }
@@ -862,9 +859,9 @@ namespace Ankh.YouTrack
         public static bool DeleteCredential(string target)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException(nameof(target));
             if (target.Length == 0)
-                throw new ArgumentException("Empty credential target", "target");
+                throw new ArgumentException("Empty credential target", nameof(target));
 
             bool found;
             lock (_applicationInstanceCredentialCache)
@@ -891,8 +888,7 @@ namespace Ankh.YouTrack
         /// <param name="e">The <see cref="EventArgs"/> containing data for the event.</param>
         protected virtual void OnUserNameChanged(EventArgs e)
         {
-            if (UserNameChanged != null)
-                UserNameChanged(this, e);
+            UserNameChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -901,8 +897,7 @@ namespace Ankh.YouTrack
         /// <param name="e">The <see cref="EventArgs"/> containing data for the event.</param>
         protected virtual void OnPasswordChanged(EventArgs e)
         {
-            if (PasswordChanged != null)
-                PasswordChanged(this, e);
+            PasswordChanged?.Invoke(this, e);
         }
 
         private bool PromptForCredentialsCredUI(IntPtr owner, bool storedCredentials)
@@ -912,9 +907,9 @@ namespace Ankh.YouTrack
             if (ShowSaveCheckBox)
                 flags |= NativeMethods.CREDUI_FLAGS.SHOW_SAVE_CHECK_BOX;
 
-            StringBuilder user = new StringBuilder(NativeMethods.CREDUI_MAX_USERNAME_LENGTH);
+            var user = new StringBuilder(NativeMethods.CREDUI_MAX_USERNAME_LENGTH);
             user.Append(UserName);
-            StringBuilder pw = new StringBuilder(NativeMethods.CREDUI_MAX_PASSWORD_LENGTH);
+            var pw = new StringBuilder(NativeMethods.CREDUI_MAX_PASSWORD_LENGTH);
             pw.Append(Password);
 
             NativeMethods.CredUIReturnCodes result = NativeMethods.CredUIPromptForCredentials(ref info, Target, IntPtr.Zero, 0, user, NativeMethods.CREDUI_MAX_USERNAME_LENGTH, pw, NativeMethods.CREDUI_MAX_PASSWORD_LENGTH, ref _isSaveChecked, flags);
@@ -962,9 +957,8 @@ namespace Ankh.YouTrack
                     }
                 }
 
-                uint outBufferSize;
                 uint package = 0;
-                NativeMethods.CredUIReturnCodes result = NativeMethods.CredUIPromptForWindowsCredentials(ref info, 0, ref package, inBuffer, inBufferSize, out outBuffer, out outBufferSize, ref _isSaveChecked, flags);
+                NativeMethods.CredUIReturnCodes result = NativeMethods.CredUIPromptForWindowsCredentials(ref info, 0, ref package, inBuffer, inBufferSize, out outBuffer, out var outBufferSize, ref _isSaveChecked, flags);
                 switch (result)
                 {
                     case NativeMethods.CredUIReturnCodes.NO_ERROR:
@@ -1038,7 +1032,7 @@ namespace Ankh.YouTrack
 
         private bool RetrieveCredentials()
         {
-            NetworkCredential credential = RetrieveCredential(Target);
+            var credential = RetrieveCredential(Target);
             if (credential != null)
             {
                 UserName = credential.UserName;
@@ -1070,7 +1064,7 @@ namespace Ankh.YouTrack
         {
             if (UseApplicationInstanceCredentialCache)
             {
-                NetworkCredential credential = RetrieveCredentialFromApplicationInstanceCache(Target);
+                var credential = RetrieveCredentialFromApplicationInstanceCache(Target);
                 if (credential != null)
                 {
                     UserName = credential.UserName;
@@ -1093,9 +1087,9 @@ namespace Ankh.YouTrack
         {
             try
             {
-                if (disposing && (components != null))
+                if (disposing)
                 {
-                    components.Dispose();
+                    components?.Dispose();
                 }
             }
             finally

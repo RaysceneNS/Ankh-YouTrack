@@ -64,7 +64,7 @@ namespace Ankh.YouTrack.IssueTracker.Forms
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void buttonLoadProjects_Click(object sender, EventArgs e)
+        private void ButtonLoadProjects_Click(object sender, EventArgs e)
         {
             LoadProjects();
         }
@@ -74,13 +74,14 @@ namespace Ankh.YouTrack.IssueTracker.Forms
             if (!this.ValidateChildren())
                 return;
 
-            ConfigPageEventArgs args = new ConfigPageEventArgs();
-            this.Cursor = Cursors.WaitCursor;
+            var args = new ConfigPageEventArgs();
 
             var repoUri =
                 new Uri(textRepositoryUri.Text.EndsWith("/") ? textRepositoryUri.Text : textRepositoryUri.Text + "/");
 
             var youTrackConnect = new YouTrackConnect(repoUri);
+
+            this.Cursor = Cursors.WaitCursor;
             try
             {
                 var cred = youTrackConnect.GetUserCredential();
@@ -116,18 +117,15 @@ namespace Ankh.YouTrack.IssueTracker.Forms
                 this.Cursor = Cursors.Default;
             }
 
-            if (OnPageEvent != null)
-            {
-                OnPageEvent(this, args);
-            }
+            OnPageEvent?.Invoke(this, args);
         }
 
         /// <summary>
-        /// Perform validation agains the supplied uri
+        /// Perform validation against the supplied uri
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void textUrl_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        private void TextUrl_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
             errorProvider.SetError(textRepositoryUri, "");
             if (string.IsNullOrWhiteSpace(textRepositoryUri.Text))
@@ -137,8 +135,7 @@ namespace Ankh.YouTrack.IssueTracker.Forms
             }
             else
             {
-                Uri uri;
-                bool validUri = Uri.TryCreate(textRepositoryUri.Text.Trim(), UriKind.Absolute, out uri);
+                bool validUri = Uri.TryCreate(textRepositoryUri.Text.Trim(), UriKind.Absolute, out var uri);
                 if (!validUri)
                 {
                     errorProvider.SetError(textRepositoryUri, "Uri is invalid.");

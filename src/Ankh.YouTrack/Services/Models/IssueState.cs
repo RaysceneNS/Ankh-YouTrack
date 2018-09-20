@@ -2,7 +2,7 @@
 
 namespace Ankh.YouTrack.Services.Models
 {
-	[DebuggerDisplay("{Name}")]
+	[DebuggerDisplay("{" + nameof(Name) + "}")]
 	public class IssueState
 	{
 		public string Name { get; set; }

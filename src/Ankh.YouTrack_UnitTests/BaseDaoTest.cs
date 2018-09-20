@@ -6,14 +6,10 @@ namespace Ankh.YouTrack_UnitTests
 	[TestClass]
 	public class BaseDaoTest
 	{
-	    /// <summary>
-		///A test for GetProjects
-		///</summary>
 		[TestMethod]
-		public void LoginTest()
+		public void GetUserCredentialTest()
 		{
-            YouTrackConnect service = new YouTrackConnect(Constants.RepositoryUri);
-
+            var service = new YouTrackConnect(Constants.RepositoryUri);
             var cred = service.GetUserCredential();
 	        Assert.IsNotNull(cred);
 		}
