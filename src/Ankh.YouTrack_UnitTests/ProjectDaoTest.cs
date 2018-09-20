@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Ankh.YouTrack.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,7 +17,7 @@ namespace Ankh.YouTrack_UnitTests
 		}
 
 		[TestMethod]
-		public async void GetProjectsTest()
+		public async Task GetProjectsTest()
 		{
 			var actual = await _target.GetProjectsAsync();
 			Assert.IsNotNull(actual);
@@ -24,11 +25,11 @@ namespace Ankh.YouTrack_UnitTests
 		}
 
         [TestMethod]
-		public async void GetIssuesTest()
+		public async Task GetIssuesTest()
 		{
             var actual = await _target.GetIssuesAsync("", "");
 			Assert.IsNotNull(actual);
-			Assert.AreNotEqual(actual.Count(), 0);
+			Assert.AreNotEqual(actual.Count, 0);
 		}
 	}
 }
