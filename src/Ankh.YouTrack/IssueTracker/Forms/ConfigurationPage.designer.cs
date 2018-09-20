@@ -30,11 +30,12 @@
 		{
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.Label urlLabel;
-            this.textRepositoryUri = new System.Windows.Forms.TextBox();
-            this.btnLoadProjects = new System.Windows.Forms.Button();
+            this.textBoxRepositoryUri = new System.Windows.Forms.TextBox();
+            this.buttonChooseProject = new System.Windows.Forms.Button();
             this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.label1 = new System.Windows.Forms.Label();
-            this.cboProjects = new System.Windows.Forms.ComboBox();
+            this.textBoxProjectID = new System.Windows.Forms.TextBox();
+            this.buttonTest = new System.Windows.Forms.Button();
             urlLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.SuspendLayout();
@@ -48,23 +49,23 @@
             urlLabel.Text = "YouTrack URL";
             urlLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // textRepositoryUri
+            // textBoxRepositoryUri
             // 
-            this.textRepositoryUri.Location = new System.Drawing.Point(105, 12);
-            this.textRepositoryUri.Name = "textRepositoryUri";
-            this.textRepositoryUri.Size = new System.Drawing.Size(261, 20);
-            this.textRepositoryUri.TabIndex = 1;
-            this.textRepositoryUri.Validating += new System.ComponentModel.CancelEventHandler(this.TextUrl_Validating);
+            this.textBoxRepositoryUri.Location = new System.Drawing.Point(105, 12);
+            this.textBoxRepositoryUri.Name = "textBoxRepositoryUri";
+            this.textBoxRepositoryUri.Size = new System.Drawing.Size(206, 20);
+            this.textBoxRepositoryUri.TabIndex = 1;
+            this.textBoxRepositoryUri.Validating += new System.ComponentModel.CancelEventHandler(this.TextBoxRepositoryUri_Validating);
             // 
-            // btnLoadProjects
+            // buttonChooseProject
             // 
-            this.btnLoadProjects.Location = new System.Drawing.Point(105, 36);
-            this.btnLoadProjects.Name = "btnLoadProjects";
-            this.btnLoadProjects.Size = new System.Drawing.Size(54, 23);
-            this.btnLoadProjects.TabIndex = 6;
-            this.btnLoadProjects.Text = "Load";
-            this.btnLoadProjects.UseVisualStyleBackColor = true;
-            this.btnLoadProjects.Click += new System.EventHandler(this.ButtonLoadProjects_Click);
+            this.buttonChooseProject.Location = new System.Drawing.Point(264, 38);
+            this.buttonChooseProject.Name = "buttonChooseProject";
+            this.buttonChooseProject.Size = new System.Drawing.Size(79, 23);
+            this.buttonChooseProject.TabIndex = 6;
+            this.buttonChooseProject.Text = "Choose...";
+            this.buttonChooseProject.UseVisualStyleBackColor = true;
+            this.buttonChooseProject.Click += new System.EventHandler(this.ButtonChooseProject_Click);
             // 
             // errorProvider
             // 
@@ -73,33 +74,43 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(59, 41);
+            this.label1.Location = new System.Drawing.Point(45, 41);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(40, 13);
+            this.label1.Size = new System.Drawing.Size(54, 13);
             this.label1.TabIndex = 11;
-            this.label1.Text = "Project";
+            this.label1.Text = "Project ID";
             // 
-            // cboProjects
+            // textBoxProjectID
             // 
-            this.cboProjects.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboProjects.FormattingEnabled = true;
-            this.cboProjects.Location = new System.Drawing.Point(165, 38);
-            this.cboProjects.Name = "cboProjects";
-            this.cboProjects.Size = new System.Drawing.Size(200, 21);
-            this.cboProjects.TabIndex = 12;
+            this.textBoxProjectID.Location = new System.Drawing.Point(105, 38);
+            this.textBoxProjectID.Name = "textBoxProjectID";
+            this.textBoxProjectID.ReadOnly = true;
+            this.textBoxProjectID.Size = new System.Drawing.Size(153, 20);
+            this.textBoxProjectID.TabIndex = 13;
+            // 
+            // buttonTest
+            // 
+            this.buttonTest.Location = new System.Drawing.Point(317, 11);
+            this.buttonTest.Name = "buttonTest";
+            this.buttonTest.Size = new System.Drawing.Size(79, 23);
+            this.buttonTest.TabIndex = 14;
+            this.buttonTest.Text = "Test";
+            this.buttonTest.UseVisualStyleBackColor = true;
+            this.buttonTest.Click += new System.EventHandler(this.ButtonTest_Click);
             // 
             // ConfigurationPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.Controls.Add(this.cboProjects);
+            this.Controls.Add(this.buttonTest);
+            this.Controls.Add(this.textBoxProjectID);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.btnLoadProjects);
-            this.Controls.Add(this.textRepositoryUri);
+            this.Controls.Add(this.buttonChooseProject);
+            this.Controls.Add(this.textBoxRepositoryUri);
             this.Controls.Add(urlLabel);
             this.Name = "ConfigurationPage";
-            this.Size = new System.Drawing.Size(413, 79);
+            this.Size = new System.Drawing.Size(413, 108);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -108,10 +119,11 @@
 
 		#endregion
 
-        private System.Windows.Forms.TextBox textRepositoryUri;
-		private System.Windows.Forms.Button btnLoadProjects;
+        private System.Windows.Forms.TextBox textBoxRepositoryUri;
+		private System.Windows.Forms.Button buttonChooseProject;
         private System.Windows.Forms.ErrorProvider errorProvider;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox cboProjects;
-	}
+        private System.Windows.Forms.TextBox textBoxProjectID;
+        private System.Windows.Forms.Button buttonTest;
+    }
 }

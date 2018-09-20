@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using Ankh.ExtensionPoints.IssueTracker;
@@ -14,7 +13,6 @@ namespace Ankh.YouTrack.IssueTracker
     {
 	    private readonly Uri _uri;
 		private readonly string _repositoryId;
-		private readonly IDictionary<string, object> _properties;
 		private IssuesView _control;
 
 		/// <summary>
@@ -24,21 +22,19 @@ namespace Ankh.YouTrack.IssueTracker
 		/// <returns></returns>
         public static IssueRepository Create(IssueRepositorySettings settings)
 		{
-		    return settings != null ? new AnkhRepository(settings.RepositoryUri, settings.RepositoryId, settings.CustomProperties) : null;
+		    return settings != null ? new AnkhRepository(settings.RepositoryUri, settings.RepositoryId) : null;
 		}
 
         /// <summary>
-		/// Initializes a new instance of the <see cref="AnkhRepository"/> class.
-		/// </summary>
-		/// <param name="uri">The URI.</param>
-		/// <param name="repositoryId">The repository id.</param>
-		/// <param name="properties">The properties.</param>
-    	public AnkhRepository(Uri uri, string repositoryId, IDictionary<string, object> properties)
+        /// Initializes a new instance of the <see cref="AnkhRepository"/> class.
+        /// </summary>
+        /// <param name="uri">The URI.</param>
+        /// <param name="repositoryId">The repository id.</param>
+        public AnkhRepository(Uri uri, string repositoryId)
             : base(AppConstants.CONNECTOR_NAME)
         {
             _uri = uri;
             _repositoryId = repositoryId;
-            _properties = properties;
         }
 
         /// <summary>
@@ -58,14 +54,6 @@ namespace Ankh.YouTrack.IssueTracker
         public override string RepositoryId
         {
             get { return _repositoryId; }
-        }
-
-        /// <summary>
-        /// Gets the custom properties specific to this type of connector
-        /// </summary>
-        public override IDictionary<string, object> CustomProperties
-        {
-            get { return _properties; }
         }
 
         /// <summary>

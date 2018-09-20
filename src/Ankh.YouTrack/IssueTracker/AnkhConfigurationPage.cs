@@ -8,7 +8,7 @@ namespace Ankh.YouTrack.IssueTracker
     /// <summary>
     /// Configuration page 
     /// </summary>
-    class AnkhConfigurationPage : IssueRepositoryConfigurationPage, IWin32Window
+    internal class AnkhConfigurationPage : IssueRepositoryConfigurationPage, IWin32Window
     {
         private ConfigurationPage _control;
 
@@ -19,20 +19,13 @@ namespace Ankh.YouTrack.IssueTracker
         {
             get
             {
-                if (_control != null)
-                {
-                    return _control.Settings;
-                }
-
-                return base.Settings;
+                return _control != null ? _control.UiToSettings() : base.Settings;
             }
             set
             {
-                if (value != null
-                    && value.ConnectorName == AppConstants.CONNECTOR_NAME)
+                if (value != null && value.ConnectorName == AppConstants.CONNECTOR_NAME)
                 {
-                    // populate UI with new settings
-                    ((ConfigurationPage)Control).Settings = value;
+                    ((ConfigurationPage)Control).SettingsToUi(value);
                 }
             }
         }
@@ -43,27 +36,16 @@ namespace Ankh.YouTrack.IssueTracker
             {
                 if (_control == null)
                 {
-                    var control = new ConfigurationPage();
-                    control.OnPageEvent += control_OnPageEvent;
-                    _control = control;
+                    _control = new ConfigurationPage();
+                    _control.OnPageChanged += delegate(object sender, ConfigPageEventArgs args) { ConfigurationPageChanged(args); }; 
                 }
                 return _control;
             }
         }
-
-        void control_OnPageEvent(object sender, ConfigPageEventArgs e)
-        {
-            // raise page changed event to notify AnkhSVN
-            ConfigurationPageChanged(e);
-        }
-
-        #region IWin32Window Members
-
+        
         public IntPtr Handle
         {
             get { return Control.Handle; }
         }
-
-        #endregion
     }
 }

@@ -29,6 +29,7 @@
 		private void InitializeComponent()
 		{
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IssuesView));
             this.btnSearch = new System.Windows.Forms.Button();
             this.pnlButttons = new System.Windows.Forms.Panel();
             this.textQuery = new System.Windows.Forms.TextBox();
@@ -57,11 +58,14 @@
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Location = new System.Drawing.Point(697, 6);
+            this.btnSearch.Image = ((System.Drawing.Image)(resources.GetObject("btnSearch.Image")));
+            this.btnSearch.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnSearch.Location = new System.Drawing.Point(705, 9);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(75, 23);
+            this.btnSearch.Size = new System.Drawing.Size(67, 23);
             this.btnSearch.TabIndex = 1;
             this.btnSearch.Text = "Search";
+            this.btnSearch.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.BtnSearchClick);
             // 
@@ -72,17 +76,18 @@
             this.pnlButttons.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlButttons.Location = new System.Drawing.Point(0, 0);
             this.pnlButttons.Name = "pnlButttons";
-            this.pnlButttons.Size = new System.Drawing.Size(775, 39);
+            this.pnlButttons.Size = new System.Drawing.Size(775, 45);
             this.pnlButttons.TabIndex = 2;
             // 
             // textQuery
             // 
             this.textQuery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textQuery.Location = new System.Drawing.Point(9, 8);
+            this.textQuery.Location = new System.Drawing.Point(9, 10);
             this.textQuery.Name = "textQuery";
-            this.textQuery.Size = new System.Drawing.Size(680, 20);
+            this.textQuery.Size = new System.Drawing.Size(690, 20);
             this.textQuery.TabIndex = 4;
+            this.textQuery.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TextQuery_KeyDown);
             // 
             // dgvList
             // 
@@ -102,13 +107,13 @@
             this.columnAssignedTo});
             this.dgvList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvList.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.dgvList.Location = new System.Drawing.Point(0, 39);
+            this.dgvList.Location = new System.Drawing.Point(0, 45);
             this.dgvList.MultiSelect = false;
             this.dgvList.Name = "dgvList";
             this.dgvList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvList.Size = new System.Drawing.Size(775, 337);
+            this.dgvList.Size = new System.Drawing.Size(775, 331);
             this.dgvList.TabIndex = 3;
-            this.dgvList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvList_CellContentClick);
+            this.dgvList.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvList_CellContentClick);
             this.dgvList.CurrentCellDirtyStateChanged += new System.EventHandler(this.DgvListCurrentCellDirtyStateChanged);
             // 
             // colSelected

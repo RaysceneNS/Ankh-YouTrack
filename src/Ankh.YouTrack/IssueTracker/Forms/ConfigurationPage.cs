@@ -2,7 +2,6 @@
 using System.Windows.Forms;
 using Ankh.ExtensionPoints.IssueTracker;
 using Ankh.YouTrack.Services;
-using Ankh.YouTrack.Services.Models;
 
 namespace Ankh.YouTrack.IssueTracker.Forms
 {
@@ -11,8 +10,9 @@ namespace Ankh.YouTrack.IssueTracker.Forms
     /// </summary>
     public partial class ConfigurationPage : UserControl
     {
-        private string _repositoryId;
-        public event EventHandler<ConfigPageEventArgs> OnPageEvent;
+        public event EventHandler<ConfigPageEventArgs> OnPageChanged;
+
+        private readonly YouTrackConnect _connect;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationPage"/> class.
@@ -20,43 +20,22 @@ namespace Ankh.YouTrack.IssueTracker.Forms
         public ConfigurationPage()
         {
             InitializeComponent();
+            _connect = new YouTrackConnect();
         }
 
-        internal IssueRepositorySettings Settings
+        internal IssueRepositorySettings UiToSettings()
         {
-            get
-            {
-                return SaveSettings();
-            }
-            set
-            {
-                SelectSettings(value);
-            }
+            var uri = new Uri(textBoxRepositoryUri.Text);
+            string repositoryId = textBoxProjectID.Text;
+            return new AnkhRepository(uri, repositoryId);
         }
 
-        /// <summary>
-        /// Saves UI values to existing settings
-        /// </summary>
-        private IssueRepositorySettings SaveSettings()
+        internal void SettingsToUi(IssueRepositorySettings settings)
         {
-            var uri = new Uri(textRepositoryUri.Text);
+            textBoxRepositoryUri.Text = settings.RepositoryUri == null ? string.Empty : settings.RepositoryUri.ToString();
+            textBoxProjectID.Text = settings.RepositoryId;
 
-            string repositoryId = null;
-            var selectedItem = cboProjects.SelectedItem;
-            if(selectedItem != null)
-                repositoryId = ((Project)selectedItem).ShortName;
-            return new AnkhRepository(uri, repositoryId, null);
-        }
-
-        /// <summary>
-        /// Populates UI with existing settings
-        /// </summary>
-        private void SelectSettings(IssueRepositorySettings settings)
-        {
-            textRepositoryUri.Text = settings.RepositoryUri == null ? string.Empty : settings.RepositoryUri.ToString();
-            _repositoryId = settings.RepositoryId;
-
-            LoadProjects();
+            this.ValidateChildren();
         }
 
         /// <summary>
@@ -64,60 +43,17 @@ namespace Ankh.YouTrack.IssueTracker.Forms
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void ButtonLoadProjects_Click(object sender, EventArgs e)
+        private void ButtonChooseProject_Click(object sender, EventArgs e)
         {
-            LoadProjects();
-        }
-
-        private void LoadProjects()
-        {
-            if (!this.ValidateChildren())
-                return;
-
-            var args = new ConfigPageEventArgs();
-
-            var repoUri =
-                new Uri(textRepositoryUri.Text.EndsWith("/") ? textRepositoryUri.Text : textRepositoryUri.Text + "/");
-
-            var youTrackConnect = new YouTrackConnect(repoUri);
-
-            this.Cursor = Cursors.WaitCursor;
-            try
+            var dlg = new SelectProject(_connect)
             {
-                var cred = youTrackConnect.GetUserCredential();
-                if (cred != null)
-                {
-                    if (!youTrackConnect.Login(cred.UserName, cred.Password))
-                        throw new Exception("Username and/or Password is not valid.");
-                    var projects = youTrackConnect.GetProjects();
-                    cboProjects.DataSource = projects;
-                    cboProjects.DisplayMember = "Name";
-                    foreach (var project in projects)
-                    {
-                        if (project.ShortName == _repositoryId)
-                        {
-                            cboProjects.SelectedItem = project;
-                            break;
-                        }
-                    }
-                    args.IsComplete = true;
-                    cboProjects.Enabled = true;
-                    youTrackConnect.ConfirmUserCredential(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                youTrackConnect.ConfirmUserCredential(false);
-                args.IsComplete = false;
-                args.Exception = ex;
-                cboProjects.Enabled = false;
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-            }
+                ProjectId = textBoxProjectID.Text
+            };
 
-            OnPageEvent?.Invoke(this, args);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                textBoxProjectID.Text = dlg.ProjectId;
+            }
         }
 
         /// <summary>
@@ -125,22 +61,40 @@ namespace Ankh.YouTrack.IssueTracker.Forms
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TextUrl_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        private void TextBoxRepositoryUri_Validating(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            errorProvider.SetError(textRepositoryUri, "");
-            if (string.IsNullOrWhiteSpace(textRepositoryUri.Text))
+            errorProvider.SetError(textBoxRepositoryUri, "");
+            if (string.IsNullOrWhiteSpace(textBoxRepositoryUri.Text))
             {
-                errorProvider.SetError(textRepositoryUri, "Uri is required.");
+                errorProvider.SetError(textBoxRepositoryUri, "Uri is required.");
                 e.Cancel = true;
             }
             else
             {
-                bool validUri = Uri.TryCreate(textRepositoryUri.Text.Trim(), UriKind.Absolute, out var uri);
-                if (!validUri)
+                if (!Uri.TryCreate(textBoxRepositoryUri.Text.Trim(), UriKind.Absolute, out var uri))
                 {
-                    errorProvider.SetError(textRepositoryUri, "Uri is invalid.");
+                    errorProvider.SetError(textBoxRepositoryUri, "Uri is invalid.");
                     e.Cancel = true;
                 }
+                else
+                {
+                    _connect.Uri = uri;
+                }
+            }
+
+            buttonTest.Enabled = !e.Cancel;
+            buttonChooseProject.Enabled = false;
+        }
+
+        private async void ButtonTest_Click(object sender, EventArgs e)
+        {
+            var cred = _connect.GetUserCredential();
+            if (cred != null)
+            {
+                var ok = await _connect.LoginAsync(cred.UserName, cred.Password);
+                _connect.ConfirmUserCredential(ok);
+                buttonChooseProject.Enabled = ok;
+                OnPageChanged?.Invoke(this, new ConfigPageEventArgs { IsComplete = ok });
             }
         }
     }

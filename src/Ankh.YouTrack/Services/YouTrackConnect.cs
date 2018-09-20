@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Xml.Linq;
 using Ankh.YouTrack.Services.Models;
@@ -14,15 +15,25 @@ namespace Ankh.YouTrack.Services
 	internal class YouTrackConnect
     {
         private CredentialDialog _credDlg;
-		private readonly Uri _uri;
+		private Uri _uri;
 		private readonly CookieContainer _cookieContainer = new CookieContainer();
 		private bool _isLoggedIn;
 
-	    public YouTrackConnect(Uri uri)
-	    {
-	        _uri = uri;
-	    }
-        
+        public YouTrackConnect()
+        {
+        }
+
+        public YouTrackConnect(Uri uri)
+        {
+            _uri = uri;
+        }
+
+        public Uri Uri
+        {
+            get { return _uri; }
+            set { _uri = value; }
+        }
+
         public NetworkCredential GetUserCredential()
         {
             var credential = CredentialDialog.RetrieveCredentialFromApplicationInstanceCache(_uri.ToString());
@@ -59,11 +70,11 @@ namespace Ankh.YouTrack.Services
 		/// <param name="user">The user.</param>
 		/// <param name="pwd">The password.</param>
 		/// <returns>true if the login was successful</returns>
-		public bool Login(string user, string pwd)
+		public async Task<bool> LoginAsync(string user, string pwd)
 		{
 			var dict = new Dictionary<string, string> {{"login", user}, {"password", pwd}};
 		    var loginUri = new Uri(_uri.OriginalString.Replace(_uri.PathAndQuery, "/") + "rest/user/login");
-			_isLoggedIn = Post(loginUri, dict);
+			_isLoggedIn = await PostAsync(loginUri, dict);
 			return _isLoggedIn;
 		}
 
@@ -73,7 +84,7 @@ namespace Ankh.YouTrack.Services
 		/// <param name="uri">The URI.</param>
 		/// <param name="parameters">The parameters.</param>
 		/// <returns></returns>
-		private bool Post(Uri uri, ICollection<KeyValuePair<string, string>> parameters)
+		private async Task<bool> PostAsync(Uri uri, ICollection<KeyValuePair<string, string>> parameters)
 		{
 			var formattedPostRequest = CreateFormattedPostRequest(parameters);
 			byte[] bytes = Encoding.UTF8.GetBytes(formattedPostRequest);
@@ -90,7 +101,7 @@ namespace Ankh.YouTrack.Services
 				rs.Write(bytes, 0, bytes.Length);
 			}
 
-			using (var response = (HttpWebResponse)req.GetResponse())
+			using (var response = (HttpWebResponse)await req.GetResponseAsync())
 			{
 			    if (response.StatusCode == HttpStatusCode.OK)
                     return true;
@@ -119,34 +130,24 @@ namespace Ankh.YouTrack.Services
 			}
 			return parameterBuilder.ToString();
 		}
-
+        
 		/// <summary>
-		/// Makes the request.
+		/// Requests the xml document from uri.
 		/// </summary>
 		/// <param name="uri">The URI.</param>
 		/// <returns></returns>
-		private HttpWebRequest MakeRequest(Uri uri)
+		private async Task<XDocument> RequestDocumentAsync(Uri uri)
 		{
-			var req = (HttpWebRequest)WebRequest.Create(uri);
-			req.ProtocolVersion = HttpVersion.Version11;
-			req.Method = "GET";
-			req.CookieContainer = _cookieContainer;
-			return req;
-		}
+		    var req = WebRequest.CreateHttp(uri);
+		    req.ProtocolVersion = HttpVersion.Version11;
+		    req.Method = "GET";
+		    req.CookieContainer = _cookieContainer;
 
-		/// <summary>
-		/// Requests the doc.
-		/// </summary>
-		/// <param name="uri">The URI.</param>
-		/// <returns></returns>
-		private XDocument RequestDoc(Uri uri)
-		{
-			var req = MakeRequest(uri);
-			var output = new StringBuilder();
-			using (var resp = (HttpWebResponse)req.GetResponse())
+            var output = new StringBuilder();
+			using (var resp = (HttpWebResponse) await req.GetResponseAsync())
 			{
-				Stream stream = resp.GetResponseStream();
-				Encoding encode = Encoding.UTF8;
+				var stream = resp.GetResponseStream();
+				var encode = Encoding.UTF8;
 
 				if (stream == null)
 					throw new NullReferenceException("Response stream is null.");
@@ -154,135 +155,63 @@ namespace Ankh.YouTrack.Services
 				// Pipes the stream to a higher level stream reader with the required encoding format. 
 				using (var readStream = new StreamReader(stream, encode))
 				{
-					const int BUFFER_SIZE = 1024;
+					const int BUFFER_SIZE = 10240;
 					var read = new char[BUFFER_SIZE];
 					int count = readStream.Read(read, 0, BUFFER_SIZE);
 					while (count > 0)
 					{
-						output.Append(new String(read, 0, count));
+						output.Append(new string(read, 0, count));
 						count = readStream.Read(read, 0, BUFFER_SIZE);
 					}
 				}
 			}
 			return XDocument.Parse(output.ToString());
 		}
-
-
+        
 		/// <summary>
 		/// Gets the projects.
 		/// </summary>
 		/// <returns></returns>
-		public IList<Project> GetProjects()
+		public async Task<IList<Project>> GetProjectsAsync()
 		{
-			var projects = from c in RequestDoc(new Uri(_uri.OriginalString + "rest/project/all")).Descendants()
+		    var doc = await RequestDocumentAsync(new Uri(_uri.OriginalString + "rest/project/all"));
+            var projects = from c in doc.Descendants()
 						   where c.Name.LocalName.Equals("project",StringComparison.OrdinalIgnoreCase)
 						   select new Project
 						   {
-							   ShortName = c.Attribute("shortName").Value,
-							   Name = c.Attribute("name").Value
+							   ShortName = c.Attribute("shortName")?.Value
 						   };
 			var list = projects.ToList();
-			list.Insert(0, new Project{Name = "Everything", ShortName = ""});
+		    list.Insert(0, new Project {ShortName = ""});
 			return list;
 		}
 
-		/// <summary>
-		/// Get a list of all available states.
-		/// </summary>
-		/// <returns></returns>
-		public IList<IssueState> GetStates()
-		{
-			var states = from c in RequestDoc(new Uri(_uri.OriginalString + "rest/project/states")).Descendants()
-						 where c.Name.LocalName.Equals("state",StringComparison.OrdinalIgnoreCase)
-						 select new IssueState
-						   {
-							   Resolved = bool.Parse(c.Attribute("resolved").Value),
-							   Name = c.Attribute("name").Value
-						   };
-			return states.ToList();
-		}
-
-		/// <summary>
-		/// Get a list of all available priorities.
-		/// </summary>
-		/// <returns></returns>
-		public IList<IssuePriority> GetPriorities()
-		{
-            var priorities = from c in RequestDoc(new Uri(_uri.OriginalString + "rest/project/priorities")).Descendants()
-							 where c.Name.LocalName.Equals("priority", StringComparison.OrdinalIgnoreCase)
-							 select new IssuePriority
-						   {
-							   Priority = c.Attribute("priority").Value,
-							   Name = c.Attribute("name").Value
-						   };
-			return priorities.ToList();
-		}
-
-		/// <summary>
-		/// Get a list of all available issue types.
-		/// </summary>
-		/// <returns></returns>
-		public IList<IssueType> GetIssueTypes()
-		{
-            var types = from c in RequestDoc(new Uri(_uri.OriginalString + "rest/project/types")).Descendants()
-						where c.Name.LocalName.Equals("type", StringComparison.OrdinalIgnoreCase)
-						select new IssueType
-						   {
-							   Name = c.Attribute("name").Value
-						   };
-			return types.ToList();
-		}
-
-		/// <summary>
-		/// Executes the command.
-		/// </summary>
-		/// <param name="issueId">The issue id.</param>
-		/// <param name="command">The command.</param>
-		/// <param name="comment">The comment.</param>
-		/// <param name="groupName">Name of the group.</param>
-		/// <returns></returns>
-		public void ExecuteCommand(string issueId, string command, string comment, string groupName)
-		{
-			if (string.IsNullOrEmpty(command))
-				throw new Exception("Command is required.");
-
-			var parameters = new Dictionary<string, string> { { "command", command } };
-
-			if (!string.IsNullOrEmpty(comment))
-				parameters.Add("comment", comment);
-
-			if (!string.IsNullOrEmpty(groupName))
-				parameters.Add("group", groupName);
-
-            var uri = new Uri(_uri.OriginalString + "rest/issue/" + issueId + "/execute");
-			Post(uri, parameters);
-		}
-
-		/// <summary>
+        /// <summary>
 		/// Gets the issues.
 		/// </summary>
 		/// <param name="projectId">The project id.</param>
 		/// <param name="searchTerm">The search string to execute.</param>
 		/// <param name="maxRecords">The max records.</param>
 		/// <returns></returns>
-		public IEnumerable<Issue> GetIssues(string projectId, string searchTerm, int maxRecords)
+		public async Task<IList<Issue>> GetIssuesAsync(string projectId, string searchTerm, int maxRecords = 100)
 		{
 			string queryString = string.IsNullOrEmpty(projectId) ? $"rest/issue?max={maxRecords}" : $"rest/issue/byproject/{projectId}?max={maxRecords}";
 
 			if (!string.IsNullOrEmpty(searchTerm))
 			{
-				queryString += "&filter=" + HttpUtility.UrlEncode(searchTerm);
+				queryString += "&filter=" + HttpUtility.UrlEncode(searchTerm)
+				                   .Replace("%23", "#"); //unencode the hash character, the rest api wants these raw
 			}
 
-            var xd = RequestDoc(new Uri(_uri.OriginalString + queryString));
+            var xd = await RequestDocumentAsync(new Uri(_uri.OriginalString + queryString));
 
 			var issues = from c in xd.Descendants()
 						 where c.Name.LocalName.Equals("issue", StringComparison.OrdinalIgnoreCase)
 						 select new Issue
 						 {
-							 Id = c.Attribute("id").Value,
-							 Created = new DateTime(1970, 1, 1).AddSeconds(long.Parse(c.GetStringValue("created")) / 1000.0),
-							 Updated = new DateTime(1970, 1, 1).AddSeconds(long.Parse(c.GetStringValue("updated")) / 1000.0),
+							 Id = c.Attribute("id")?.Value,
+							 Created = c.GetDateTimeValue("created"),
+							 Updated = c.GetDateTimeValue("updated"),
 							 Summary = c.GetStringValue("summary"),
 							 ReporterName = c.GetStringValue("reporterName"),
 							 UpdaterName = c.GetStringValue("updaterName"),
@@ -292,7 +221,7 @@ namespace Ankh.YouTrack.Services
 							 Type = c.GetStringValue("type"),
 							 Project = c.GetStringValue("projectShortName")
 						 };
-			return issues;
+			return issues.ToList();
 		}
     }
 }

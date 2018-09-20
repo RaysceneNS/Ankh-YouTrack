@@ -16,41 +16,17 @@ namespace Ankh.YouTrack_UnitTests
 		}
 
 		[TestMethod]
-		public void GetProjectsTest()
+		public async void GetProjectsTest()
 		{
-			var actual = _target.GetProjects();
+			var actual = await _target.GetProjectsAsync();
 			Assert.IsNotNull(actual);
 			Assert.AreNotEqual(actual.Count, 0);
 		}
 
-		[TestMethod]
-		public void GetStatesTest()
+        [TestMethod]
+		public async void GetIssuesTest()
 		{
-			var actual = _target.GetStates();
-			Assert.IsNotNull(actual);
-			Assert.AreNotEqual(actual.Count, 0);
-		}
-
-		[TestMethod]
-		public void GetPrioritiesTest()
-		{
-			var actual = _target.GetPriorities();
-			Assert.IsNotNull(actual);
-			Assert.AreNotEqual(actual.Count, 0);
-		}
-
-		[TestMethod]
-		public void GetIssueTypesTest()
-		{
-			var actual = _target.GetIssueTypes();
-			Assert.IsNotNull(actual);
-			Assert.AreNotEqual(actual.Count, 0);
-		}
-
-		[TestMethod]
-		public void GetIssuesTest()
-		{
-            var actual = _target.GetIssues("", "", 100);
+            var actual = await _target.GetIssuesAsync("", "");
 			Assert.IsNotNull(actual);
 			Assert.AreNotEqual(actual.Count(), 0);
 		}
