@@ -10,25 +10,21 @@ namespace Ankh.YouTrack.IssueTracker.Forms
 {
 	public partial class IssuesView : UserControl
 	{
-        private Uri _uri;
-        private string _repositoryId;
+        private readonly Uri _uri;
+        private readonly string _repositoryId;
 	    private readonly List<string> _selectedIssues;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IssuesView"/> class.
         /// </summary>
-        public IssuesView()
+        public IssuesView(Uri uri, string repositoryId)
 		{
+            _uri = uri;
+            _repositoryId = repositoryId;
             _selectedIssues = new List<string>();
 			InitializeComponent();
 		}
-
-        public void LoadData(Uri uri, string repositoryId)
-        {
-            _uri = uri;
-            _repositoryId = repositoryId;
-        }
-
+        
         /// <summary>
         /// Handles the Load event of the IssuesListView control.
         /// </summary>
@@ -68,8 +64,7 @@ namespace Ankh.YouTrack.IssueTracker.Forms
                 youTrackConnect.ConfirmUserCredential(true);
 		        dgvList.DataSource = issues;
 		        dgvList.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-
-
+                
 		        //assign prior selections
 		        foreach (DataGridViewRow row in dgvList.Rows)
 		        {

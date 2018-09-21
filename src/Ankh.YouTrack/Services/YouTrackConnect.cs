@@ -17,7 +17,6 @@ namespace Ankh.YouTrack.Services
         private CredentialDialog _credDlg;
 		private Uri _uri;
 		private readonly CookieContainer _cookieContainer = new CookieContainer();
-		private bool _isLoggedIn;
 
         public YouTrackConnect()
         {
@@ -45,7 +44,7 @@ namespace Ankh.YouTrack.Services
                 _credDlg = new CredentialDialog
                 {
                     Target = _uri.ToString(),
-                    UseApplicationInstanceCredentialCache = true,
+                    UseApplicationInstanceCredentialCache = false,
                     ShowSaveCheckBox = true,
                     ShowUIForSavedCredentials = true,
                     WindowTitle = "Issue Tracker",
@@ -72,10 +71,10 @@ namespace Ankh.YouTrack.Services
 		/// <returns>true if the login was successful</returns>
 		public async Task<bool> LoginAsync(string user, string pwd)
 		{
-			var dict = new Dictionary<string, string> {{"login", user}, {"password", pwd}};
 		    var loginUri = new Uri(_uri.OriginalString.Replace(_uri.PathAndQuery, "/") + "rest/user/login");
-			_isLoggedIn = await PostAsync(loginUri, dict);
-			return _isLoggedIn;
+			return await PostAsync(loginUri, 
+			    new Tuple<string, string>("login", user), 
+			    new Tuple<string, string>("password", pwd));
 		}
 
 		/// <summary>
@@ -84,24 +83,24 @@ namespace Ankh.YouTrack.Services
 		/// <param name="uri">The URI.</param>
 		/// <param name="parameters">The parameters.</param>
 		/// <returns></returns>
-		private async Task<bool> PostAsync(Uri uri, ICollection<KeyValuePair<string, string>> parameters)
+		private async Task<bool> PostAsync(Uri uri, params Tuple<string, string>[] parameters)
 		{
 			var formattedPostRequest = CreateFormattedPostRequest(parameters);
 			byte[] bytes = Encoding.UTF8.GetBytes(formattedPostRequest);
 
-			var req = (HttpWebRequest)WebRequest.Create(uri);
-			req.ProtocolVersion = HttpVersion.Version11;
-			req.Method = "POST";
-			req.ContentLength = bytes.Length;
-			req.ContentType = "application/x-www-form-urlencoded";
-			req.CookieContainer = _cookieContainer;
+			var request = WebRequest.CreateHttp(uri);
+			request.ProtocolVersion = HttpVersion.Version11;
+			request.Method = "POST";
+			request.ContentLength = bytes.Length;
+			request.ContentType = "application/x-www-form-urlencoded";
+			request.CookieContainer = _cookieContainer;
 
-			using (var rs = req.GetRequestStream())
+			using (var rs = request.GetRequestStream())
 			{
 				rs.Write(bytes, 0, bytes.Length);
 			}
 
-			using (var response = (HttpWebResponse)await req.GetResponseAsync())
+			using (var response = (HttpWebResponse)await request.GetResponseAsync())
 			{
 			    if (response.StatusCode == HttpStatusCode.OK)
                     return true;
@@ -116,16 +115,15 @@ namespace Ankh.YouTrack.Services
 		/// </summary>
 		/// <param name="values">The values.</param>
 		/// <returns></returns>
-		private static string CreateFormattedPostRequest(ICollection<KeyValuePair<string, string>> values)
+		private static string CreateFormattedPostRequest(IEnumerable<Tuple<string, string>> values)
 		{
 			var parameterBuilder = new StringBuilder();
 			var counter = 0;
 			foreach (var value in values)
 			{
-				parameterBuilder.AppendFormat("{0}={1}", value.Key, HttpUtility.UrlEncode(value.Value));
-
-				if (counter != values.Count - 1)
+				if (counter != 0)
 					parameterBuilder.Append("&");
+				parameterBuilder.AppendFormat("{0}={1}", value.Item1, HttpUtility.UrlEncode(value.Item2));
 				counter++;
 			}
 			return parameterBuilder.ToString();
@@ -138,34 +136,22 @@ namespace Ankh.YouTrack.Services
 		/// <returns></returns>
 		private async Task<XDocument> RequestDocumentAsync(Uri uri)
 		{
-		    var req = WebRequest.CreateHttp(uri);
-		    req.ProtocolVersion = HttpVersion.Version11;
-		    req.Method = "GET";
-		    req.CookieContainer = _cookieContainer;
+		    var request = WebRequest.CreateHttp(uri);
+		    request.ProtocolVersion = HttpVersion.Version11;
+		    request.Method = "GET";
+		    request.CookieContainer = _cookieContainer;
 
-            var output = new StringBuilder();
-			using (var resp = (HttpWebResponse) await req.GetResponseAsync())
+			using (var resp = (HttpWebResponse) await request.GetResponseAsync())
 			{
 				var stream = resp.GetResponseStream();
-				var encode = Encoding.UTF8;
-
 				if (stream == null)
 					throw new NullReferenceException("Response stream is null.");
 
-				// Pipes the stream to a higher level stream reader with the required encoding format. 
-				using (var readStream = new StreamReader(stream, encode))
+				using (var readStream = new StreamReader(stream, Encoding.UTF8))
 				{
-					const int BUFFER_SIZE = 10240;
-					var read = new char[BUFFER_SIZE];
-					int count = readStream.Read(read, 0, BUFFER_SIZE);
-					while (count > 0)
-					{
-						output.Append(new string(read, 0, count));
-						count = readStream.Read(read, 0, BUFFER_SIZE);
-					}
+				    return XDocument.Parse(readStream.ReadToEnd());
 				}
 			}
-			return XDocument.Parse(output.ToString());
 		}
         
 		/// <summary>
@@ -195,7 +181,9 @@ namespace Ankh.YouTrack.Services
 		/// <returns></returns>
 		public async Task<IList<Issue>> GetIssuesAsync(string projectId, string searchTerm, int maxRecords = 100)
 		{
-			string queryString = string.IsNullOrEmpty(projectId) ? $"rest/issue?max={maxRecords}" : $"rest/issue/byproject/{projectId}?max={maxRecords}";
+			string queryString = string.IsNullOrEmpty(projectId) ? 
+			    $"rest/issue?max={maxRecords}" :
+			    $"rest/issue/byproject/{projectId}?max={maxRecords}";
 
 			if (!string.IsNullOrEmpty(searchTerm))
 			{

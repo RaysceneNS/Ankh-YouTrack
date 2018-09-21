@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Ankh.YouTrack.Services;
@@ -28,27 +29,19 @@ namespace Ankh.YouTrack.IssueTracker.Forms
             this.Cursor = Cursors.WaitCursor;
             try
             {
-                var cred = _connect.GetUserCredential();
-                if (cred != null)
+                var projects = await _connect.GetProjectsAsync();
+                cboProjects.DataSource = projects;
+                foreach (var project in projects)
                 {
-                    var projects = await _connect.GetProjectsAsync();
-                    cboProjects.DataSource = projects;
-                    foreach (var project in projects)
+                    if (project.ShortName == ProjectId)
                     {
-                        if (project.ShortName == ProjectId)
-                        {
-                            cboProjects.SelectedItem = project;
-                            break;
-                        }
+                        cboProjects.SelectedItem = project;
+                        break;
                     }
-                    buttonOK.Enabled = true;
                 }
-                else
-                {
-                    buttonOK.Enabled = false;
-                }
+                buttonOK.Enabled = true;
             }
-            catch (Exception)
+            catch (WebException)
             {
                 buttonOK.Enabled = false;
             }

@@ -83,9 +83,11 @@
             // 
             this.textQuery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.textQuery.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textQuery.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textQuery.Location = new System.Drawing.Point(9, 10);
             this.textQuery.Name = "textQuery";
-            this.textQuery.Size = new System.Drawing.Size(690, 20);
+            this.textQuery.Size = new System.Drawing.Size(690, 21);
             this.textQuery.TabIndex = 4;
             this.textQuery.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TextQuery_KeyDown);
             // 
@@ -95,6 +97,8 @@
             this.dgvList.AllowUserToDeleteRows = false;
             this.dgvList.AllowUserToResizeRows = false;
             this.dgvList.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.dgvList.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgvList.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
             this.dgvList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvList.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colSelected,

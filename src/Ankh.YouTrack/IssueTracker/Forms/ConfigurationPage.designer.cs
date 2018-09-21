@@ -59,7 +59,7 @@
             // 
             // buttonChooseProject
             // 
-            this.buttonChooseProject.Location = new System.Drawing.Point(264, 38);
+            this.buttonChooseProject.Location = new System.Drawing.Point(317, 46);
             this.buttonChooseProject.Name = "buttonChooseProject";
             this.buttonChooseProject.Size = new System.Drawing.Size(79, 23);
             this.buttonChooseProject.TabIndex = 6;
@@ -74,7 +74,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(45, 41);
+            this.label1.Location = new System.Drawing.Point(45, 51);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(54, 13);
             this.label1.TabIndex = 11;
@@ -82,10 +82,10 @@
             // 
             // textBoxProjectID
             // 
-            this.textBoxProjectID.Location = new System.Drawing.Point(105, 38);
+            this.textBoxProjectID.Location = new System.Drawing.Point(105, 46);
             this.textBoxProjectID.Name = "textBoxProjectID";
             this.textBoxProjectID.ReadOnly = true;
-            this.textBoxProjectID.Size = new System.Drawing.Size(153, 20);
+            this.textBoxProjectID.Size = new System.Drawing.Size(206, 20);
             this.textBoxProjectID.TabIndex = 13;
             // 
             // buttonTest

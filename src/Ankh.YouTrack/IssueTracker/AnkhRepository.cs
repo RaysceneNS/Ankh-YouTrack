@@ -124,20 +124,7 @@ namespace Ankh.YouTrack.IssueTracker
 
         private IssuesView Control
         {
-            get
-            {
-                if (_control == null)
-                {
-                    _control = CreateControl();
-                }
-                _control.LoadData(_uri, _repositoryId);
-                return _control;
-            }
-        }
-
-        private static IssuesView CreateControl()
-        {
-            return new IssuesView();
+            get { return _control ?? (_control = new IssuesView(_uri, _repositoryId)); }
         }
 
         #region IDisposable Members
